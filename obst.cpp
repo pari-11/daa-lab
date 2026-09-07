@@ -1,76 +1,89 @@
-#include<iostream>
-#include<algorithm>
+#include <iostream>
+#include <vector>
 using namespace std;
 
 int main() {
-    int n; //number of frequencies/keys
-    cout<<"Enter the number of keys: ";
-    cin>>n;
 
-    int keys[100];
-    int freq[100];
-    int C[n][n] = {0}; //initializing the cost table to 0
+    int n;
 
-    cout<<"Enter the keys: ";
-    for(int i=0; i<n; i++) {
-        cout<<"Key "<<i<<": ";
-        cin>>keys[i];
+    cout << "Enter number of keys: ";
+    cin >> n;
+
+    vector<int> keys(n + 1);
+    vector<int> freq(n + 1);
+
+    cout << "Enter keys: ";
+    for (int i = 1; i <= n; i++) {
+        cin >> keys[i];
     }
 
-    cout<<"Enter the frequencies: ";
-    for(int i=0; i<n; i++) {
-        cout<<"Key "<<i<<": ";
-        cin>>freq[i];
+    cout << "Enter frequencies: ";
+    for (int i = 1; i <= n; i++) {
+        cin >> freq[i];
     }
 
-    //base case C[i][i]
-    for(int i=0; i<n; i++) {
-        C[i][i] = freq[i];
+    vector<vector<int>> C(n + 1, vector<int>(n + 1, 0));
+
+
+    // Base case
+    for (int i = 0; i <= n; i++) {
+        C[i][i] = 0;
     }
 
-    //solve according to j-i
-    for(int length=1; length<n; length++) { //length = j-i
-        for(int i=0; i<n-length; i++) { //index 0 1 2 3
-            int j = i + length; //if j-i = 1, then if we know i=0, then its subsequent j will be 0+i =0+1 and so on
 
-            C[i][j] = 99999; //initialise a big value so that we can compare roots according to values of k
-            
-            int W=0;
-            for(int x=i; x<=j; x++) {
+    // length = j - i
+    for (int length = 1; length <= n; length++) {
+
+        for (int i = 0; i <= n - length; i++) {
+
+            int j = i + length;
+
+            C[i][j] = 99999;
+
+            // Calculate W(i,j)
+            int W = 0;
+
+            for (int x = i + 1; x <= j; x++) {
                 W = W + freq[x];
             }
 
-            for(int k=i; k<=j; k++){
-                int left=0;
-                int right=0;
 
-                if(k>i) {
-                    left = C[i][k - 1];
-                }
-                if(k<j) {
-                    right = C[k + 1][j];
-                }
-                int cost = left + right + W;
+            // Try every possible root k
+            for (int k = i + 1; k <= j; k++) {
+
+                int cost = C[i][k - 1] + C[k][j] + W;
+
                 C[i][j] = min(C[i][j], cost);
             }
         }
-    } 
+    }
 
-        cout << "\nC Table:\n";
 
-    for (int i = 0; i < n; i++) {
+    // Print table
+    cout << "\nOBST Cost Table:\n\n";
 
-        for (int j = 0; j < n; j++) {
+    cout << "\t";
+    for (int j = 0; j <= n; j++) {
+        cout << j << "\t";
+    }
+    cout << endl;
 
-            if (j >= i)
-                cout << C[i][j] << "\t";
-            else
+    for (int i = 0; i <= n; i++) {
+
+        cout << i << "\t";
+
+        for (int j = 0; j <= n; j++) {
+
+            if (j < i)
                 cout << "-\t";
+            else
+                cout << C[i][j] << "\t";
         }
 
         cout << endl;
     }
 
-    cout<<"\nMinimum OBST Cost = "<<C[0][n - 1]<<endl;
+    cout << "\nMinimum OBST Cost = " << C[0][n] << endl;
+
     return 0;
 }
