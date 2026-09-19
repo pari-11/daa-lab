@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <chrono>
 using namespace std;
 
 int main() {
@@ -91,13 +92,65 @@ int main() {
     // Testing for different input sizes
     cout << "\nTesting for different input sizes:\n";
 
-    int testSizes[] = {4, 10, 20, 50, 100};
+    int testSizes[] = {10, 50, 100, 200, 500};
+
+    cout << "\nInput Size\tExecution Time (microseconds)\n";
 
     for (int size : testSizes) {
-        cout << "Input size n = " << size
-             << " -> Time Complexity: O(" << size << "^2)"
-             << ", Space Complexity: O(" << size << "^2)"
-             << endl;
+
+        // Generate test coin values
+        int testCoins[size];
+
+        for (int i = 0; i < size; i++) {
+            testCoins[i] = (i % 100) + 1;
+        }
+
+        int testDP[size][size] = {0};
+
+        // Start timer
+        auto start = chrono::high_resolution_clock::now();
+
+        // Base case
+        for (int i = 0; i < size; i++) {
+            testDP[i][i] = testCoins[i];
+        }
+
+        // Fill DP table
+        for (int length = 2; length <= size; length++) {
+
+            for (int i = 0; i <= size - length; i++) {
+
+                int j = i + length - 1;
+
+                int leftChoice;
+
+                if (i + 2 <= j)
+                    leftChoice = testCoins[i] +
+                                 min(testDP[i + 2][j],
+                                     testDP[i + 1][j - 1]);
+                else
+                    leftChoice = testCoins[i];
+
+                int rightChoice;
+
+                if (i <= j - 2)
+                    rightChoice = testCoins[j] +
+                                  min(testDP[i + 1][j - 1],
+                                      testDP[i][j - 2]);
+                else
+                    rightChoice = testCoins[j];
+
+                testDP[i][j] = max(leftChoice, rightChoice);
+            }
+        }
+
+        // Stop timer
+        auto end = chrono::high_resolution_clock::now();
+
+        auto duration =
+            chrono::duration_cast<chrono::microseconds>(end - start);
+
+        cout << size << "\t\t" << duration.count() << endl;
     }
 
     return 0;
